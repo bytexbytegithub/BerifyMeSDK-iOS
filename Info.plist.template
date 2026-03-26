@@ -1,0 +1,35 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE plist PUBLIC "-//Apple//DTD PLIST 1.0//EN" "http://www.apple.com/DTDs/PropertyList-1.0.dtd">
+<plist version="1.0">
+<dict>
+    <!-- Camera permission - required -->
+    <key>NSCameraUsageDescription</key>
+    <string>This app requires camera access for identity verification.</string>
+    
+    <!-- Microphone permission - recommended -->
+    <key>NSMicrophoneUsageDescription</key>
+    <string>This app requires microphone access for video verification.</string>
+    
+    <!-- Photo library permission - required -->
+    <key>NSPhotoLibraryUsageDescription</key>
+    <string>This app requires photo library access to upload documents for verification.</string>
+    
+    <!-- Face ID permission - required (if device supports) -->
+    <!-- ⚠️ Important: This value must not be empty or the app will crash -->
+    <key>NSFaceIDUsageDescription</key>
+    <string>This app uses Face ID for secure biometric authentication.</string>
+    
+    <!-- Location permission - required (for fraud prevention) -->
+    <key>NSLocationWhenInUseUsageDescription</key>
+    <string>This app may use your location for fraud prevention during verification.</string>
+    
+    <!-- Network permission configuration -->
+    <key>NSAppTransportSecurity</key>
+    <dict>
+        <key>NSAllowsArbitraryLoads</key>
+        <false/>
+        <key>NSAllowsLocalNetworking</key>
+        <true/>
+    </dict>
+</dict>
+</plist>
