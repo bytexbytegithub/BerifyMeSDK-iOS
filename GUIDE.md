@@ -29,22 +29,31 @@
 
 #### Step 2: Add SDK (1 min)
 
-1. In Xcode left panel, click project name (top blue icon)
-2. Select project (not Target)
-3. Click **Package Dependencies** tab
-4. Click **+**
-5. Click **Add Local...**
-6. Select the SDK directory (use a **relative path** or your local path):
-   - If the SDK is in your project: browse to the SDK folder under your project root
-   - If the SDK is elsewhere: select the folder that contains `Package.swift` and `Sources/BerifymeSDK`
+1. If needed, install CocoaPods:
 
-```
-<path-to-sdk-folder>
+```bash
+sudo gem install cocoapods
 ```
 
-7. Click **Add Package**
-8. Select **BerifymeSDK**
-9. Click **Add Package**
+2. Create or open your app's `Podfile`
+3. Add:
+
+```ruby
+platform :ios, '13.0'
+
+target 'SDKTest' do
+  use_frameworks! :linkage => :static
+  pod 'BerifymeSDK', '1.2.0'
+end
+```
+
+4. Run:
+
+```bash
+pod install
+```
+
+5. Open the generated `.xcworkspace` file in Xcode
 
 #### Step 3: Configure SDK (1 min)
 
@@ -87,11 +96,10 @@ See [iOS permissions](#ios-permissions) for the full list and details.
 └─────────────────────────────────────────────────────────────┘
                             ↓
 ┌─────────────────────────────────────────────────────────────┐
-│  2. Add Swift Package dependency                            │
-│  Project Settings > Package Dependencies > +                │
-│  - Choose "Add Local..."                                    │
-│  - Browse to: SDK folder (contains Package.swift)           │
-│  - Select BerifymeSDK product                               │
+│  2. Add CocoaPods dependency                                │
+│  - Add pod 'BerifymeSDK', '1.2.0' to Podfile               │
+│  - Run pod install                                          │
+│  - Open the generated .xcworkspace                          │
 └─────────────────────────────────────────────────────────────┘
                             ↓
 ┌─────────────────────────────────────────────────────────────┐
@@ -225,7 +233,7 @@ class ViewController: UIViewController {
 }
 ```
 
-**Incode language (optional):** Pass `locale` in `presentModal` when you want a fixed UI language. Allowed values: `"en"`, `"zh-TW"`, `"mix"`. If you omit `locale`, the SDK chooses a default from the device’s preferred languages (Traditional Chinese environments typically get Chinese; others default to English).
+**UI language (optional):** Pass `locale` in `presentModal` when you want a fixed UI language. Allowed values: `"en"` and `"zh-TW"`. If you omit `locale`, the SDK chooses a default from the device’s preferred languages (Traditional Chinese environments typically get `zh-TW`; others default to `en`).
 
 ### SwiftUI (App + UIViewControllerRepresentable)
 
@@ -323,11 +331,6 @@ struct VerificationWrapper: UIViewControllerRepresentable {
 - **Do not force timeout**; let the page redirect or postMessage naturally
 - **Keep listening** for WebView message / navigation
 
-### Provider selection logic
-
-- **New user (Onboarding)**: Show provider selection; order from `getOrderByCountry`.
-- **Existing user (Login)**: Flow from `getUserVenderByPhone` vender; show selection only if no data.
-
 ---
 
 ## iOS permissions
@@ -366,7 +369,7 @@ then `NSFaceIDUsageDescription` is empty or missing; set a non-empty string.
 
 - **iOS API limits**: For iOS 13+, avoid APIs that require iOS 14+
 - **Environment ambiguity**: Use `SwiftUI.Environment` / `BerifymeSDK.Environment` explicitly
-- **No such module 'BerifymeSDK'**: Clean Build Folder, Reset Package Caches
+- **No such module 'BerifymeSDK'**: Run `pod install`, open the `.xcworkspace`, then Clean Build Folder
 
 ### Runtime issues
 

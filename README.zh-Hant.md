@@ -30,14 +30,24 @@ Berify.me iOS Swift SDK 是專為 iOS 應用設計的原生身分驗證（KYC/ID
 
 ## 📥 安裝方式
 
-### Swift Package Manager
+在 `Podfile` 中加入：
 
-在 Xcode 中：
+```ruby
+platform :ios, '13.0'
 
-1. 選擇 **File** > **Add Packages...**
-2. 輸入 SDK 的 Git 網址
-3. 選擇版本或分支
-4. 點擊 **Add Package**
+target 'YourApp' do
+  use_frameworks! :linkage => :static
+  pod 'BerifymeSDK', '1.2.0'
+end
+```
+
+接著執行：
+
+```bash
+pod install
+```
+
+安裝完成後，請使用 Xcode 開啟產生的 `.xcworkspace`。
 
 ## 🚀 快速開始
 

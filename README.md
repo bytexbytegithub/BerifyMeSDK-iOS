@@ -30,14 +30,24 @@ Berify.me iOS Swift SDK is a native identity verification (KYC/IDV) solution for
 
 ## 📥 Installation
 
-### Swift Package Manager
+Add this to your `Podfile`:
 
-In Xcode:
+```ruby
+platform :ios, '13.0'
 
-1. Choose **File** > **Add Packages...**
-2. Enter the SDK Git URL
-3. Select version or branch
-4. Click **Add Package**
+target 'YourApp' do
+  use_frameworks! :linkage => :static
+  pod 'BerifymeSDK', '1.2.0'
+end
+```
+
+Then run:
+
+```bash
+pod install
+```
+
+After installation, open the generated `.xcworkspace` in Xcode.
 
 ## 🚀 Quick Start
 

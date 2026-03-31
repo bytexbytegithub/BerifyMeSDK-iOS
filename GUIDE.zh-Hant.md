@@ -29,22 +29,31 @@
 
 #### Step 2：加入 SDK（約 1 分鐘）
 
-1. 在 Xcode 左側面板點擊專案名稱（上方藍色圖示）
-2. 選擇專案（不要選 Target）
-3. 點擊 **Package Dependencies** 分頁
-4. 點擊 **+**
-5. 點擊 **Add Local...**
-6. 選擇 SDK 目錄（請使用**相對路徑**或您的本機路徑）：
-   - 若 SDK 在您的專案內：瀏覽到專案根目錄下的 SDK 資料夾
-   - 若 SDK 在其他位置：選擇內含 `Package.swift` 與 `Sources/BerifymeSDK` 的資料夾
+1. 若尚未安裝 CocoaPods，先執行：
 
-```
-<SDK 資料夾路徑>
+```bash
+sudo gem install cocoapods
 ```
 
-7. 點擊 **Add Package**
-8. 選擇 **BerifymeSDK**
-9. 點擊 **Add Package**
+2. 建立或開啟您 App 的 `Podfile`
+3. 加入：
+
+```ruby
+platform :ios, '13.0'
+
+target 'SDKTest' do
+  use_frameworks! :linkage => :static
+  pod 'BerifymeSDK', '1.2.0'
+end
+```
+
+4. 執行：
+
+```bash
+pod install
+```
+
+5. 使用 Xcode 開啟產生的 `.xcworkspace`
 
 #### Step 3：設定 SDK（約 1 分鐘）
 
@@ -87,11 +96,10 @@ UIKit（Storyboard）請在 `ViewController.swift` 中加入一個按鈕，並�
 └─────────────────────────────────────────────────────────────┘
                             ↓
 ┌─────────────────────────────────────────────────────────────┐
-│  2. 加入 Swift Package 依賴                                  │
-│  Project Settings > Package Dependencies > +                │
-│  - 選擇 "Add Local..."                                      │
-│  - 瀏覽到 SDK 資料夾（內含 Package.swift）                     │
-│  - 選擇 BerifymeSDK 產品                                     │
+│  2. 加入 CocoaPods 依賴                                      │
+│  - 在 Podfile 加入 pod 'BerifymeSDK', '1.2.0'               │
+│  - 執行 pod install                                         │
+│  - 開啟產生的 .xcworkspace                                  │
 └─────────────────────────────────────────────────────────────┘
                             ↓
 ┌─────────────────────────────────────────────────────────────┐
@@ -225,7 +233,7 @@ class ViewController: UIViewController {
 }
 ```
 
-**Incode 語系（選填）：** 若要固定介面語言，在 `presentModal` 傳入 `locale`。可用值：`"en"`、`"zh-TW"`、`"mix"`。若不傳 `locale`，SDK 會依手機語系偏好自動選擇（一般繁體中文環境為繁中，其餘多為英文）。
+**介面語系（選填）：** 若要固定介面語言，可在 `presentModal` 傳入 `locale`。可用值為 `"en"` 與 `"zh-TW"`。若不傳 `locale`，SDK 會依手機語系偏好自動選擇（一般繁體中文環境會使用 `zh-TW`，其餘預設為 `en`）。
 
 ### SwiftUI（App + UIViewControllerRepresentable）
 
@@ -323,11 +331,6 @@ struct VerificationWrapper: UIViewControllerRepresentable {
 - **不要強制逾時**；讓頁面自然 redirect 或 postMessage
 - **持續監聽** WebView 的 message／導覽
 
-### 供應商選擇邏輯
-
-- **新使用者（Onboarding）**：顯示供應商選擇；順序依 `getOrderByCountry`。
-- **既有使用者（Login）**：依 `getUserVenderByPhone` 的 vender 決定流程；僅在無資料時顯示選擇。
-
 ---
 
 ## iOS 權限
@@ -366,7 +369,7 @@ The value for NSFaceIDUsageDescription must be a non-empty string.
 
 - **iOS API 限制**：若最低為 iOS 13+，請避免使用需 iOS 14+ 的 API
 - **Environment 歧義**：請明確使用 `SwiftUI.Environment` 或 `BerifymeSDK.Environment`
-- **No such module 'BerifymeSDK'**：執行 Clean Build Folder、Reset Package Caches
+- **No such module 'BerifymeSDK'**：先執行 `pod install`、確認開的是 `.xcworkspace`，再執行 Clean Build Folder
 
 ### 執行時問題
 
