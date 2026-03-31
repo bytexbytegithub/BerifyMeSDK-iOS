@@ -13,8 +13,9 @@ private let langSwitchCooldownMs = 2000
 /// 語系切換後等待相機釋放再載入新頁（與 RNSDK 一致）
 private let cameraReleaseDelaySeconds: TimeInterval = 0.5
 
-/// Incode WebView view (aligned with RN SDK implementation + LangSelector / locale query)
-class IncodeWebView: UIView, WKNavigationDelegate, WKScriptMessageHandler {
+/// Incode 流程以 `WKWebView` 載入 Web Frontend：`/ReactNativeSDKIncodeWebViewLogin`（`renderAuthFace` 人臉登入）、`/ReactNativeSDKIncodeWebViewOnBoarding`（Welcome onboarding）。
+/// 與 RN SDK 相同之 `postMessage` 橋接、`locale`／`langCooldown` query、語系切換後延遲重載（釋放相機）。
+class IncodeWebView: UIView, WKNavigationDelegate, WKUIDelegate, WKScriptMessageHandler {
     private let webView: WKWebView
     private let loadingIndicator: UIActivityIndicatorView
     private let loadingLabel: UILabel
@@ -52,6 +53,9 @@ class IncodeWebView: UIView, WKNavigationDelegate, WKScriptMessageHandler {
         let config = WKWebViewConfiguration()
         config.processPool = sharedWebViewProcessPool
         config.preferences.javaScriptEnabled = true
+        if #available(iOS 15.0, *) {
+            config.defaultWebpagePreferences.allowsContentJavaScript = true
+        }
         let userContentController = WKUserContentController()
         let script = """
         (function() {
@@ -123,6 +127,7 @@ class IncodeWebView: UIView, WKNavigationDelegate, WKScriptMessageHandler {
         backgroundColor = .white
 
         webView.navigationDelegate = self
+        webView.uiDelegate = self
         webView.translatesAutoresizingMaskIntoConstraints = false
         addSubview(webView)
 
@@ -248,6 +253,20 @@ class IncodeWebView: UIView, WKNavigationDelegate, WKScriptMessageHandler {
     func webView(_ webView: WKWebView, didFail navigation: WKNavigation!, withError error: Error) {
         hideLoading()
         onError(error.localizedDescription)
+    }
+
+    // MARK: - WKUIDelegate（iOS 15+）
+
+    /// 內嵌 `WKWebView` 的 `getUserMedia` **不**吃「設定 → Safari → 相機」；須由 **本 App** 的隱私權與此 callback 授權。未實作時網頁常收不到相機且 Incode 仍顯示 Safari 教學。
+    @available(iOS 15.0, *)
+    func webView(
+        _ webView: WKWebView,
+        requestMediaCapturePermissionFor origin: WKSecurityOrigin,
+        initiatedByFrame frame: WKFrameInfo,
+        type: WKMediaCaptureType,
+        decisionHandler: @escaping (WKPermissionDecision) -> Void
+    ) {
+        decisionHandler(WKMediaCapturePermission.decision(for: type))
     }
 
     /// 支援 body 為 Dictionary 或 JSON 字串（與 Web postMessage(JSON.stringify(...)) 對齊）

@@ -114,7 +114,7 @@ public class PermissionService {
             let status = PHPhotoLibrary.authorizationStatus()
             
             switch status {
-            case .authorized:
+            case .authorized, .limited:
                 return true
             case .notDetermined:
                 return await withCheckedContinuation { continuation in
@@ -140,6 +140,8 @@ public class PermissionService {
                 switch context.biometryType {
                 case .faceID:
                     return (true, "Face ID")
+                case .opticID:
+                    return (true, "Optic ID")
                 case .touchID:
                     return (true, "Touch ID")
                 case .none:

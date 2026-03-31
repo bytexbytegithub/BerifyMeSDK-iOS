@@ -505,6 +505,16 @@ public class BerifymeModalViewController: UIViewController {
         }
     }
     
+    /// Incode 在 WebView 內以相機為主；不在此預先要求相簿（使用者若於網頁選「從相簿上傳」時再由系統／WebKit 提示）。另嘗試請求麥克風以利部分 liveness／錄影流程。
+    private func requestPermissionsForIncodeWebView() async -> String? {
+        let cameraOk = await PermissionService.requestCameraPermission()
+        if !cameraOk {
+            return "Camera permission is required for verification. Please enable in Settings > Privacy & Security > Camera."
+        }
+        _ = await PermissionService.requestMicrophonePermission()
+        return nil
+    }
+
     private func showIncodeView() {
         guard let user = currentUser, let token = sessionToken else {
             errorMessage = "Something went wrong, but we're working on it. Please try again later or contact support for assistance."
@@ -512,25 +522,36 @@ public class BerifymeModalViewController: UIViewController {
             return
         }
         let isOnboarding = currentPageStatus == .incodeOnBoarding
-        let view = IncodeWebView(
-            user: user,
-            token: token,
-            environment: environment,
-            isOnboarding: isOnboarding,
-            locale: locale,
-            onComplete: { [weak self] updatedUser in
-                if let updatedUser = updatedUser {
-                    self?.currentUser = updatedUser
+
+        Task {
+            if let message = await requestPermissionsForIncodeWebView() {
+                await MainActor.run {
+                    self.errorMessage = message
+                    self.updatePageStatus(self.fallbackPageForError())
                 }
-                self?.updatePageStatus(.allSet)
-            },
-            onError: { [weak self] error in
-                self?.errorMessage = error
-                // No vendor selection: external-phone → verifiedExternalPhoneNumber; else → sendSNS. User can retry.
-                self?.updatePageStatus(self?.fallbackPageForError() ?? .sendSNS)
+                return
             }
-        )
-        addContentView(view)
+            await MainActor.run {
+                let view = IncodeWebView(
+                    user: user,
+                    token: token,
+                    environment: environment,
+                    isOnboarding: isOnboarding,
+                    locale: locale,
+                    onComplete: { [weak self] updatedUser in
+                        if let updatedUser = updatedUser {
+                            self?.currentUser = updatedUser
+                        }
+                        self?.updatePageStatus(.allSet)
+                    },
+                    onError: { [weak self] error in
+                        self?.errorMessage = error
+                        self?.updatePageStatus(self?.fallbackPageForError() ?? .sendSNS)
+                    }
+                )
+                self.addContentView(view)
+            }
+        }
     }
     
     private func showAllSetView() {

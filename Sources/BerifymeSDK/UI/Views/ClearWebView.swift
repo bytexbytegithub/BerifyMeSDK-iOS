@@ -2,7 +2,7 @@ import UIKit
 import WebKit
 
 /// Clear WebView view
-class ClearWebView: UIView, WKNavigationDelegate, WKScriptMessageHandler {
+class ClearWebView: UIView, WKNavigationDelegate, WKUIDelegate, WKScriptMessageHandler {
     private let webView: WKWebView
     private let loadingIndicator: UIActivityIndicatorView
     
@@ -108,6 +108,7 @@ class ClearWebView: UIView, WKNavigationDelegate, WKScriptMessageHandler {
         backgroundColor = .white
         
         webView.navigationDelegate = self
+        webView.uiDelegate = self
         webView.translatesAutoresizingMaskIntoConstraints = false
         addSubview(webView)
         
@@ -220,9 +221,17 @@ class ClearWebView: UIView, WKNavigationDelegate, WKScriptMessageHandler {
         decisionHandler(.allow)
     }
 
+    // MARK: - WKUIDelegate（iOS 15+，見 WKMediaCapturePermission）
+
     @available(iOS 15.0, *)
-    func webView(_ webView: WKWebView, requestMediaCapturePermissionFor origin: WKSecurityOrigin, initiatedByFrame frame: WKFrameInfo, type: WKMediaCaptureType, decisionHandler: @escaping (WKPermissionDecision) -> Void) {
-        decisionHandler(.grant)
+    func webView(
+        _ webView: WKWebView,
+        requestMediaCapturePermissionFor origin: WKSecurityOrigin,
+        initiatedByFrame frame: WKFrameInfo,
+        type: WKMediaCaptureType,
+        decisionHandler: @escaping (WKPermissionDecision) -> Void
+    ) {
+        decisionHandler(WKMediaCapturePermission.decision(for: type))
     }
     
     func webView(_ webView: WKWebView, didFail navigation: WKNavigation!, withError error: Error) {
