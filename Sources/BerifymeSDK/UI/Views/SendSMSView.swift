@@ -202,6 +202,7 @@ class SendSMSView: UIView {
         nationalSeparator.translatesAutoresizingMaskIntoConstraints = false
 
         nationalPhoneTextField.keyboardType = .phonePad
+        nationalPhoneTextField.textContentType = .telephoneNumber
         nationalPhoneTextField.font = .systemFont(ofSize: 16, weight: .medium)
         nationalPhoneTextField.textColor = .black
         nationalPhoneTextField.backgroundColor = .clear
