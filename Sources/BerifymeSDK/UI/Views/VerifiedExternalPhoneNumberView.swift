@@ -189,7 +189,7 @@ class VerifiedExternalPhoneNumberView: UIView {
                 
                 // 3. Get vender (if present show Welcome back; else Vender selection)
                 let venderRes = try await userAPI.getUserVenderByPhone(phoneNumber: phoneNumber, token: token)
-                if let err = venderRes.error {
+                if venderRes.error != nil {
                     await MainActor.run {
                         loadingIndicator.stopAnimating()
                         onError("Something went wrong, but we're working on it. Please try again later or contact support for assistance.")

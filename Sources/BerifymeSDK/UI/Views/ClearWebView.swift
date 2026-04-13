@@ -150,27 +150,21 @@ class ClearWebView: UIView, WKNavigationDelegate, WKUIDelegate, WKScriptMessageH
                 return
             }
             
-            do {
-                guard let clearAPI = BerifymeSDK.shared.clear else {
-                    await MainActor.run {
-                        onError("Clear API not initialized")
-                    }
-                    return
-                }
-                let path = isOnboarding ? "ReactNativeSDKClearWebViewOnBoarding" : "ReactNativeSDKClearWebViewLogin"
-                let webviewURL = "\(environment.webviewDomain)/\(path)?token=\(token)&userId=\(user.id)"
-                
+            guard BerifymeSDK.shared.clear != nil else {
                 await MainActor.run {
-                    if let url = URL(string: webviewURL) {
-                        let request = URLRequest(url: url)
-                        webView.load(request)
-                    } else {
-                        onError("Invalid URL: \(webviewURL)")
-                    }
+                    onError("Clear API not initialized")
                 }
-            } catch {
-                await MainActor.run {
-                    onError(error.localizedDescription)
+                return
+            }
+            let path = isOnboarding ? "ReactNativeSDKClearWebViewOnBoarding" : "ReactNativeSDKClearWebViewLogin"
+            let webviewURL = "\(environment.webviewDomain)/\(path)?token=\(token)&userId=\(user.id)"
+
+            await MainActor.run {
+                if let url = URL(string: webviewURL) {
+                    let request = URLRequest(url: url)
+                    webView.load(request)
+                } else {
+                    onError("Invalid URL: \(webviewURL)")
                 }
             }
         }

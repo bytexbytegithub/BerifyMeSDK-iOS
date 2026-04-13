@@ -97,7 +97,7 @@ class VerifyUserView: UIView {
         if let _ = onBack {
             let backImageView = UIImageView()
             if let imageURL = URL(string: "https://idv.berify.me/arrowLeft.png") {
-                URLSession.shared.dataTask(with: imageURL) { [weak self] data, _, _ in
+                URLSession.shared.dataTask(with: imageURL) { data, _, _ in
                     guard let data = data, let image = UIImage(data: data) else { return }
                     DispatchQueue.main.async {
                         backImageView.image = image
@@ -142,6 +142,7 @@ class VerifyUserView: UIView {
         
         codeTextField.placeholder = "Enter code"
         codeTextField.keyboardType = .numberPad
+        codeTextField.textContentType = .oneTimeCode
         codeTextField.textAlignment = .left
         codeTextField.font = .systemFont(ofSize: 16, weight: .medium)
         codeTextField.textColor = .black // Align RN SDK: color: 'black'
@@ -462,7 +463,7 @@ class VerifyUserView: UIView {
                 
                 // vender decides which login to use
                 let venderRes = try await userAPI.getUserVenderByPhone(phoneNumber: processedPhone, token: token)
-                if let err = venderRes.error {
+                if venderRes.error != nil {
                     await MainActor.run {
                         isLoading = false
                         loadingIndicator.stopAnimating()

@@ -313,8 +313,6 @@ public class BerifymeModalViewController: UIViewController {
                 showErrorView(message: "This verification provider flow is not yet supported (\(currentPageStatus.pageName)).")
             case .allSet:
                 showAllSetView()
-            default:
-                showLoadingView()
             }
         }
     }

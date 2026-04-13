@@ -65,10 +65,10 @@ class VerifyNewUserView: UIView {
         backgroundColor = .white
         
         // Back button (align RN SDK: use arrowLeft.png)
-        if let onBack = onBack {
+        if onBack != nil {
             let backImageView = UIImageView()
             if let imageURL = URL(string: "https://idv.berify.me/arrowLeft.png") {
-                URLSession.shared.dataTask(with: imageURL) { [weak self] data, _, _ in
+                URLSession.shared.dataTask(with: imageURL) { data, _, _ in
                     guard let data = data, let image = UIImage(data: data) else { return }
                     DispatchQueue.main.async {
                         backImageView.image = image
@@ -115,6 +115,7 @@ class VerifyNewUserView: UIView {
         // Verification code input
         codeTextField.placeholder = "Enter code"
         codeTextField.keyboardType = .numberPad
+        codeTextField.textContentType = .oneTimeCode
         codeTextField.textAlignment = .left
         codeTextField.font = .systemFont(ofSize: 16, weight: .medium)
         codeTextField.textColor = .black // Align RN SDK: color: 'black'

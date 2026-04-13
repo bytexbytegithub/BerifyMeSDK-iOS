@@ -2,10 +2,10 @@ import Foundation
 import AVFoundation
 import Photos
 import LocalAuthentication
-import CoreLocation
+@preconcurrency import CoreLocation
 
 /// Location manager delegate (for requesting location permission)
-private class LocationManagerDelegate: NSObject, CLLocationManagerDelegate {
+private final class LocationManagerDelegate: NSObject, CLLocationManagerDelegate, @unchecked Sendable {
     var continuation: CheckedContinuation<Bool, Never>?
     
     func locationManager(_ manager: CLLocationManager, didChangeAuthorization status: CLAuthorizationStatus) {
@@ -233,14 +233,8 @@ public class PermissionService {
                 manager.requestWhenInUseAuthorization()
                 
                 // If authorization status returned immediately (may happen in some cases)
-                DispatchQueue.main.asyncAfter(deadline: .now() + 0.1) {
-                    let currentStatus: CLAuthorizationStatus
-                    if #available(iOS 14.0, *) {
-                        currentStatus = manager.authorizationStatus
-                    } else {
-                        currentStatus = CLLocationManager.authorizationStatus()
-                    }
-                    
+                DispatchQueue.main.asyncAfter(deadline: .now() + 0.1) { [delegate] in
+                    let currentStatus = CLLocationManager.authorizationStatus()
                     if currentStatus != .notDetermined, let continuation = delegate.continuation {
                         delegate.continuation = nil
                         let authorized = currentStatus == .authorizedWhenInUse || currentStatus == .authorizedAlways
