@@ -55,12 +55,14 @@ public class BerifymeSDK {
     ///   - viewController: Parent view controller
     ///   - verifiedExternalPhoneNumber: Pre-verified external phone number (optional)
     ///   - locale: Incode 介面語系 `en` | `zh-TW` | `mix`（可選；省略時依裝置語系自動選擇繁中或英文）
+    ///   - faceAgeEstimation: `true` 時略過 vendor、改走臉齡 Incode WebView（對齊 RN／WebSDK）。
     ///   - onUpdate: Status update callback
     ///   - onComplete: Completion callback with verification token
     public func presentModal(
         from viewController: UIViewController,
         verifiedExternalPhoneNumber: String? = nil,
         locale: String? = nil,
+        faceAgeEstimation: Bool = false,
         onUpdate: ((UpdateData) -> Void)? = nil,
         onComplete: ((String?) -> Void)? = nil
     ) {
@@ -75,6 +77,7 @@ public class BerifymeSDK {
             environment: environment,
             verifiedExternalPhoneNumber: verifiedExternalPhoneNumber,
             locale: locale,
+            faceAgeEstimation: faceAgeEstimation,
             onUpdate: onUpdate,
             onComplete: onComplete
         )

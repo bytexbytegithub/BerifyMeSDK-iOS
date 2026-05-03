@@ -24,6 +24,8 @@ class IncodeWebView: UIView, WKNavigationDelegate, WKUIDelegate, WKScriptMessage
     private let token: String
     private let environment: Environment
     private let isOnboarding: Bool
+    /// 臉齡流程：與 onboarding 相同載入 `userId`／`token`，路徑為 `ReactNativeSDKFaceAgeEstimationWebView`
+    private let faceAgeEstimation: Bool
     private let onComplete: (User?) -> Void
     private let onError: (String) -> Void
 
@@ -35,6 +37,7 @@ class IncodeWebView: UIView, WKNavigationDelegate, WKUIDelegate, WKScriptMessage
         token: String,
         environment: Environment,
         isOnboarding: Bool,
+        faceAgeEstimation: Bool = false,
         locale: String? = nil,
         onComplete: @escaping (User?) -> Void,
         onError: @escaping (String) -> Void
@@ -43,6 +46,7 @@ class IncodeWebView: UIView, WKNavigationDelegate, WKUIDelegate, WKScriptMessage
         self.token = token
         self.environment = environment
         self.isOnboarding = isOnboarding
+        self.faceAgeEstimation = faceAgeEstimation
         self.onComplete = onComplete
         self.onError = onError
         self.currentLocale = Self.normalizeLocale(locale)
@@ -155,7 +159,7 @@ class IncodeWebView: UIView, WKNavigationDelegate, WKUIDelegate, WKScriptMessage
     }
 
     private func loadIncodePage() {
-        if !isOnboarding {
+        if !isOnboarding && !faceAgeEstimation {
             guard let incodeId = user.incodeId, !incodeId.isEmpty else {
                 onError("User has no Incode ID")
                 return
@@ -170,7 +174,9 @@ class IncodeWebView: UIView, WKNavigationDelegate, WKUIDelegate, WKScriptMessage
 
     private func buildIncodeURL() -> URL? {
         let path: String
-        if isOnboarding {
+        if faceAgeEstimation {
+            path = "/ReactNativeSDKFaceAgeEstimationWebView"
+        } else if isOnboarding {
             path = "/ReactNativeSDKIncodeWebViewOnBoarding"
         } else {
             path = "/ReactNativeSDKIncodeWebViewLogin"
@@ -185,7 +191,7 @@ class IncodeWebView: UIView, WKNavigationDelegate, WKUIDelegate, WKScriptMessage
             URLQueryItem(name: "langCooldown", value: String(langSwitchCooldownMs))
         ]
 
-        if isOnboarding {
+        if isOnboarding || faceAgeEstimation {
             items.append(URLQueryItem(name: "userId", value: user.id))
             items.append(URLQueryItem(name: "token", value: token))
         } else {

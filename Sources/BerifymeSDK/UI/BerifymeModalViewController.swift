@@ -10,6 +10,8 @@ public class BerifymeModalViewController: UIViewController {
     private let verifiedExternalPhoneNumber: String?
     /// Incode 介面語系（en | zh-TW | mix）；nil 時依裝置慣用語系決定預設（繁中 → zh-TW，其餘 → en）
     private let locale: String?
+    /// `true` 時新用戶／無 vendor 路徑改走臉齡 WebView（對齊 RN／WebSDK）。
+    private let faceAgeEstimation: Bool
     private let onUpdate: ((UpdateData) -> Void)?
     private let onComplete: ((String?) -> Void)?
     
@@ -45,6 +47,7 @@ public class BerifymeModalViewController: UIViewController {
         environment: Environment,
         verifiedExternalPhoneNumber: String? = nil,
         locale: String? = nil,
+        faceAgeEstimation: Bool = false,
         onUpdate: ((UpdateData) -> Void)? = nil,
         onComplete: ((String?) -> Void)? = nil
     ) {
@@ -53,6 +56,7 @@ public class BerifymeModalViewController: UIViewController {
         self.environment = environment
         self.verifiedExternalPhoneNumber = verifiedExternalPhoneNumber
         self.locale = locale
+        self.faceAgeEstimation = faceAgeEstimation
         self.onUpdate = onUpdate
         self.onComplete = onComplete
         super.init(nibName: nil, bundle: nil)
@@ -254,7 +258,7 @@ public class BerifymeModalViewController: UIViewController {
     private func isFullScreenFlow(_ status: PageStatus) -> Bool {
         switch status {
         case .clearOnboarding, .clearLogin,
-             .incodeOnBoarding, .incodeLogin,
+             .incodeOnBoarding, .incodeLogin, .faceAgeEstimation,
              .authidLogin, .authIdOnboarding,
              .sumsubLogin, .sumsubOnBoarding,
              .veriffLogin, .veriffOnBoarding,
@@ -302,7 +306,7 @@ public class BerifymeModalViewController: UIViewController {
                 showVerifyUserView()
             case .clearOnboarding, .clearLogin:
                 showClearView()
-            case .incodeOnBoarding, .incodeLogin:
+            case .incodeOnBoarding, .incodeLogin, .faceAgeEstimation:
                 showIncodeView()
             case .clearLoginAllSet, .clearOnboardingAllSet:
                 showAllSetView()
@@ -387,7 +391,7 @@ public class BerifymeModalViewController: UIViewController {
                 } else if let incodeId = user.incodeId, !incodeId.isEmpty {
                     self?.updatePageStatus(.incodeLogin)
                 } else {
-                    self?.updatePageStatus(.incodeOnBoarding)
+                    self?.updatePageStatus(self?.faceAgeEstimation == true ? .faceAgeEstimation : .incodeOnBoarding)
                 }
             },
             onSelectLogin: { [weak self] loginStatus in
@@ -412,7 +416,7 @@ public class BerifymeModalViewController: UIViewController {
             defaultCountryIso2: defaultPhoneCountryIso2,
             onComplete: { [weak self] user in
                 self?.currentUser = user
-                self?.updatePageStatus(.incodeOnBoarding)
+                self?.updatePageStatus(self?.faceAgeEstimation == true ? .faceAgeEstimation : .incodeOnBoarding)
             },
             onError: { [weak self] error in
                 self?.errorMessage = error
@@ -520,6 +524,7 @@ public class BerifymeModalViewController: UIViewController {
             return
         }
         let isOnboarding = currentPageStatus == .incodeOnBoarding
+        let isFaceAgeEstimation = currentPageStatus == .faceAgeEstimation
 
         Task {
             if let message = await requestPermissionsForIncodeWebView() {
@@ -535,6 +540,7 @@ public class BerifymeModalViewController: UIViewController {
                     token: token,
                     environment: environment,
                     isOnboarding: isOnboarding,
+                    faceAgeEstimation: isFaceAgeEstimation,
                     locale: locale,
                     onComplete: { [weak self] updatedUser in
                         if let updatedUser = updatedUser {
@@ -720,6 +726,8 @@ public class BerifymeModalViewController: UIViewController {
                             self.currentUser = bioUser
                             if let loginStatus {
                                 (self.currentContentView as? SendSMSView)?.showWelcomeBack(loginStatus: loginStatus, fullName: venderRes.fullName)
+                            } else if self.faceAgeEstimation {
+                                self.updatePageStatus(.faceAgeEstimation)
                             } else {
                                 self.errorMessage = "Try again later or choose a different verification provider to proceed."
                                 self.updatePageStatus(.sendSNS)
@@ -762,7 +770,7 @@ public class BerifymeModalViewController: UIViewController {
         case "clear":
             updatePageStatus(.clearOnboarding)
         case "incode":
-            updatePageStatus(.incodeOnBoarding)
+            updatePageStatus(faceAgeEstimation ? .faceAgeEstimation : .incodeOnBoarding)
         default:
             errorMessage = "Unsupported verification provider"
             // No vendor selection: external-phone → verifiedExternalPhoneNumber; else → sendSNS.

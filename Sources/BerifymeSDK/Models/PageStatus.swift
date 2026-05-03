@@ -26,6 +26,7 @@ public enum PageStatus: Int, Codable {
     case veriffLogin = 18                  // RN: 9
     case yotiLogin = 19                    // RN: 11
     case allSet = 20                       // RN: 10
+    case faceAgeEstimation = 21           // RN: 2.6（Incode 臉齡）
     
     /// String representation of page status
     public var pageName: String {
@@ -74,6 +75,8 @@ public enum PageStatus: Int, Codable {
             return "YotiLogin"
         case .allSet:
             return "VerifySuccess"
+        case .faceAgeEstimation:
+            return "FaceAgeEstimation"
         }
     }
     
@@ -94,6 +97,7 @@ public enum PageStatus: Int, Codable {
         case .sumsubOnBoarding: return 2.3
         case .veriffOnBoarding: return 2.4
         case .yotiOnBoarding: return 2.5
+        case .faceAgeEstimation: return 2.6
         case .authidLogin: return 3.0
         case .clearLogin: return 4.0
         case .incodeLogin: return 5.0
@@ -135,6 +139,7 @@ public enum PageStatus: Int, Codable {
         case 2.3: return .sumsubOnBoarding
         case 2.4: return .veriffOnBoarding
         case 2.5: return .yotiOnBoarding
+        case 2.6: return .faceAgeEstimation
         case 3.0: return .authidLogin
         case 4.0: return .clearLogin
         case 5.0: return .incodeLogin

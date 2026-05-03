@@ -88,12 +88,18 @@ final class ModelTests: XCTestCase {
         XCTAssertEqual(PageStatus.loading.rawValue, -1)
         XCTAssertEqual(PageStatus.sendSNS.rawValue, 0)
         XCTAssertEqual(PageStatus.allSet.rawValue, 20)
+        XCTAssertEqual(PageStatus.faceAgeEstimation.rawValue, 21)
+    }
+
+    func testFaceAgeEstimationReactNativeMapping() {
+        XCTAssertEqual(PageStatus.faceAgeEstimation.reactNativeValue, 2.6, accuracy: 0.0001)
+        XCTAssertEqual(PageStatus.fromReactNativeValue(2.6), PageStatus.faceAgeEstimation)
     }
     
     func testPageStatusPageNames() {
         let statuses: [PageStatus] = [
             .loading, .sendSNS, .verifyNewUser, .vender,
-            .clearOnboarding, .incodeOnBoarding, .allSet
+            .clearOnboarding, .incodeOnBoarding, .faceAgeEstimation, .allSet
         ]
         
         for status in statuses {

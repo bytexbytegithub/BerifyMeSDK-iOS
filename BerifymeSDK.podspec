@@ -1,6 +1,6 @@
 Pod::Spec.new do |s|
   s.name             = 'BerifymeSDK'
-  s.version          = '1.2.3'
+  s.version          = '1.2.4'
   s.summary          = 'Berify.me native iOS SDK for identity verification (KYC/IDV).'
   s.description      = <<-DESC
     Berify.me iOS Swift SDK provides phone verification, Incode/Clear WebView flows,
